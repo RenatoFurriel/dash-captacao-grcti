@@ -4,97 +4,540 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard — CLAUDE PARA GRC TI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg: #0f1117;
-      --surface: #1a1d27;
-      --border: #2a2d3e;
-      --accent: #6c63ff;
-      --accent2: #00d4aa;
-      --text: #e2e8f0;
-      --muted: #8892a4;
-      --card-radius: 12px;
-    }
-    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
 
+    :root {
+      --bg:        #080b12;
+      --surface:   #0e1220;
+      --surface2:  #131827;
+      --border:    #1e2438;
+      --border2:   #252d45;
+      --gold:      #e8b86d;
+      --gold2:     #f5d08a;
+      --teal:      #34d9b3;
+      --blue:      #4f8ef7;
+      --red:       #f06b6b;
+      --text:      #dde3f0;
+      --muted:     #6b7590;
+      --muted2:    #8c96b0;
+      --r:         14px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      min-height: 100vh;
+      /* subtle grain */
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    }
+
+    /* ── HEADER ─────────────────────────────────────────────────────────── */
     header {
-      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(8,11,18,.88);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
       border-bottom: 1px solid var(--border);
-      padding: 20px 32px;
+      padding: 0 40px;
+      height: 68px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
+      gap: 20px;
     }
-    .logo-area h1 { font-size: 1.25rem; font-weight: 700; color: var(--text); }
-    .logo-area p  { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
-    .status-bar { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--muted); }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent2); animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 
-    main { padding: 28px 32px; max-width: 1400px; margin: 0 auto; }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--gold) 0%, #c97b2a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: #0a0d15;
+      flex-shrink: 0;
+      box-shadow: 0 0 20px rgba(232,184,109,.25);
+    }
+    .brand-text { line-height: 1; }
+    .brand-text h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: .01em;
+    }
+    .brand-text p {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 3px;
+    }
 
-    .kpi-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 28px; }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(52,217,179,.08);
+      border: 1px solid rgba(52,217,179,.2);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 0.72rem;
+      color: var(--teal);
+      font-weight: 500;
+      letter-spacing: .04em;
+    }
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--teal);
+      animation: blink 2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+
+    #last-update {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    /* ── FILTER BAR ──────────────────────────────────────────────────────── */
+    .filter-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 40px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .filter-label {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      flex-shrink: 0;
+    }
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .filter-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 7px 12px;
+      transition: border-color .2s;
+    }
+    .filter-input-wrap:focus-within {
+      border-color: var(--gold);
+    }
+    .filter-input-wrap svg { opacity: .45; flex-shrink: 0; }
+    .filter-input-wrap input[type="date"] {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      min-width: 120px;
+    }
+    .filter-input-wrap input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(.5);
+      cursor: pointer;
+    }
+    .btn-reset {
+      background: transparent;
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      color: var(--muted2);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      padding: 7px 14px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-reset:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+    .filter-count {
+      margin-left: auto;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .filter-count span {
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    /* ── MAIN ────────────────────────────────────────────────────────────── */
+    main { padding: 32px 40px 60px; max-width: 1480px; margin: 0 auto; }
+
+    /* ── KPI STRIP ───────────────────────────────────────────────────────── */
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 32px;
+    }
+
     .kpi-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--card-radius);
-      padding: 20px;
-      text-align: center;
+      border-radius: var(--r);
+      padding: 22px 20px 18px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .2s, transform .2s;
     }
-    .kpi-card .value { font-size: 2rem; font-weight: 800; color: var(--accent); }
-    .kpi-card .label { font-size: 0.75rem; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: .05em; }
+    .kpi-card:hover {
+      border-color: var(--border2);
+      transform: translateY(-2px);
+    }
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent-color, var(--gold)), transparent);
+      opacity: .7;
+    }
+    .kpi-card .kpi-icon {
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+      opacity: .7;
+    }
+    .kpi-card .value {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: var(--accent-color, var(--gold));
+      line-height: 1;
+      letter-spacing: -.02em;
+    }
+    .kpi-card .label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 6px;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      font-weight: 500;
+    }
 
-    .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
+    /* ── SECTION TITLE ───────────────────────────────────────────────────── */
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      margin-bottom: 14px;
+      padding-left: 2px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── BREAKDOWN CARDS (faixa salarial, momento carreira) ──────────────── */
+    .breakdown-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 14px;
+      margin-bottom: 32px;
+    }
+
+    .breakdown-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 22px;
+      transition: border-color .2s;
+    }
+    .breakdown-card:hover { border-color: var(--border2); }
+    .breakdown-card h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--muted2);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .breakdown-card h2 .icon { opacity: .6; }
+
+    .bar-list { display: flex; flex-direction: column; gap: 10px; }
+    .bar-item { }
+    .bar-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 5px;
+    }
+    .bar-name {
+      font-size: 0.8rem;
+      color: var(--text);
+      font-weight: 400;
+      max-width: 75%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .bar-count {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--muted2);
+    }
+    .bar-track {
+      height: 5px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--bar-color, var(--gold)), var(--bar-color2, var(--gold2)));
+      transition: width .6s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ── CHARTS GRID ─────────────────────────────────────────────────────── */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 14px;
+    }
+
     .chart-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--card-radius);
-      padding: 20px;
+      border-radius: var(--r);
+      padding: 22px;
+      transition: border-color .2s;
     }
-    .chart-card h2 { font-size: 0.875rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 16px; }
-    .chart-card canvas { max-height: 260px; }
-
+    .chart-card:hover { border-color: var(--border2); }
+    .chart-card h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--muted2);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 18px;
+    }
+    .chart-card canvas { max-height: 240px; }
     .full-width { grid-column: 1 / -1; }
-    .full-width canvas { max-height: 180px; }
+    .full-width canvas { max-height: 160px; }
 
-    #loading { text-align: center; padding: 80px; color: var(--muted); font-size: 1rem; }
-    #error-msg { background: #3a1a1a; border: 1px solid #c0392b; color: #e74c3c; padding: 16px; border-radius: 8px; margin-bottom: 20px; display: none; }
+    /* ── LOADING / ERROR ─────────────────────────────────────────────────── */
+    #loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      gap: 16px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 2px solid var(--border2);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #error-msg {
+      background: rgba(240,107,107,.08);
+      border: 1px solid rgba(240,107,107,.25);
+      color: var(--red);
+      padding: 14px 18px;
+      border-radius: 10px;
+      margin-bottom: 24px;
+      font-size: 0.85rem;
+      display: none;
+    }
+
+    /* ── ANIMATIONS ──────────────────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .anim { animation: fadeUp .45s ease both; }
+    .anim-1 { animation-delay: .05s; }
+    .anim-2 { animation-delay: .10s; }
+    .anim-3 { animation-delay: .15s; }
+    .anim-4 { animation-delay: .20s; }
+    .anim-5 { animation-delay: .25s; }
+    .anim-6 { animation-delay: .30s; }
+
+    /* ── SCROLLBAR ───────────────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
   </style>
 </head>
 <body>
 
+<!-- HEADER -->
 <header>
-  <div class="logo-area">
-    <h1>CLAUDE PARA GRC TI — Captação de Leads</h1>
-    <p id="subtitle">Carregando dados…</p>
+  <div class="brand">
+    <div class="brand-mark">GRC</div>
+    <div class="brand-text">
+      <h1>CLAUDE PARA GRC TI</h1>
+      <p id="subtitle">Carregando dados…</p>
+    </div>
   </div>
-  <div class="status-bar">
-    <div class="dot"></div>
-    <span id="last-update">Aguardando…</span>
+  <div class="header-right">
+    <span id="last-update"></span>
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      AO VIVO
+    </div>
   </div>
 </header>
 
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <span class="filter-label">Filtrar</span>
+  <div class="filter-group">
+    <div class="filter-input-wrap">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="#8c96b0" stroke-width="1.4"/><path d="M2 6h12M6 2v4M10 2v4" stroke="#8c96b0" stroke-width="1.4" stroke-linecap="round"/></svg>
+      <input type="date" id="filter-from" title="De" />
+    </div>
+    <span style="color:var(--muted);font-size:.8rem;">→</span>
+    <div class="filter-input-wrap">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="#8c96b0" stroke-width="1.4"/><path d="M2 6h12M6 2v4M10 2v4" stroke="#8c96b0" stroke-width="1.4" stroke-linecap="round"/></svg>
+      <input type="date" id="filter-to" title="Até" />
+    </div>
+    <button class="btn-reset" id="btn-reset">Limpar</button>
+  </div>
+  <span class="filter-count" id="filter-count"></span>
+</div>
+
 <main>
   <div id="error-msg"></div>
-  <div id="loading">Carregando dados da planilha…</div>
+  <div id="loading">
+    <div class="spinner"></div>
+    <span>Carregando dados da planilha…</span>
+  </div>
+
   <div id="dashboard" style="display:none">
 
+    <!-- KPIs -->
     <div class="kpi-strip">
-      <div class="kpi-card"><div class="value" id="kpi-total">0</div><div class="label">Total de Leads</div></div>
-      <div class="kpi-card"><div class="value" id="kpi-hoje">0</div><div class="label">Inscrições Hoje</div></div>
-      <div class="kpi-card"><div class="value" id="kpi-ao-vivo">0</div><div class="label">Participarão Ao Vivo</div></div>
-      <div class="kpi-card"><div class="value" id="kpi-estados">0</div><div class="label">Estados</div></div>
+      <div class="kpi-card anim anim-1" style="--accent-color: var(--gold)">
+        <div class="kpi-icon">◆</div>
+        <div class="value" id="kpi-total">0</div>
+        <div class="label">Total de Leads</div>
+      </div>
+      <div class="kpi-card anim anim-2" style="--accent-color: var(--teal)">
+        <div class="kpi-icon">◆</div>
+        <div class="value" id="kpi-hoje">0</div>
+        <div class="label">Inscrições Hoje</div>
+      </div>
+      <div class="kpi-card anim anim-3" style="--accent-color: var(--blue)">
+        <div class="kpi-icon">◆</div>
+        <div class="value" id="kpi-ao-vivo">0</div>
+        <div class="label">Participarão Ao Vivo</div>
+      </div>
+      <div class="kpi-card anim anim-4" style="--accent-color: #a78bfa">
+        <div class="kpi-icon">◆</div>
+        <div class="value" id="kpi-estados">0</div>
+        <div class="label">Estados</div>
+      </div>
+      <div class="kpi-card anim anim-5" style="--accent-color: #f97316">
+        <div class="kpi-icon">◆</div>
+        <div class="value" id="kpi-pct-vivo">0%</div>
+        <div class="label">Taxa Ao Vivo</div>
+      </div>
     </div>
 
-    <div class="charts-grid">
+    <!-- TIMELINE -->
+    <p class="section-title anim anim-1">Evolução das Inscrições</p>
+    <div class="charts-grid anim anim-2" style="margin-bottom:32px">
       <div class="chart-card full-width">
         <h2>Inscrições por Dia</h2>
         <canvas id="chart-timeline"></canvas>
       </div>
+    </div>
+
+    <!-- BREAKDOWN CARDS -->
+    <p class="section-title anim anim-1">Perfil do Lead</p>
+    <div class="breakdown-grid anim anim-2">
+
+      <!-- Faixa Salarial -->
+      <div class="breakdown-card">
+        <h2><span class="icon">💰</span> Faixa de Renda Mensal</h2>
+        <div class="bar-list" id="bl-renda"></div>
+      </div>
+
+      <!-- Momento de Carreira -->
+      <div class="breakdown-card">
+        <h2><span class="icon">🎯</span> Momento de Carreira</h2>
+        <div class="bar-list" id="bl-carreira"></div>
+      </div>
+
+      <!-- Experiência GRC -->
+      <div class="breakdown-card">
+        <h2><span class="icon">🛡️</span> Experiência em GRC</h2>
+        <div class="bar-list" id="bl-grc"></div>
+      </div>
+
+      <!-- Tempo que conhece Arteiro -->
+      <div class="breakdown-card">
+        <h2><span class="icon">⏱️</span> Tempo que conhece o Arteiro</h2>
+        <div class="bar-list" id="bl-arteiro"></div>
+      </div>
+
+    </div>
+
+    <!-- CHARTS -->
+    <p class="section-title anim anim-1">Canais &amp; Distribuição</p>
+    <div class="charts-grid anim anim-2">
       <div class="chart-card">
         <h2>Como ficou sabendo</h2>
         <canvas id="chart-origem"></canvas>
@@ -120,64 +563,66 @@
         <canvas id="chart-funcao"></canvas>
       </div>
       <div class="chart-card">
-        <h2>Situação Atual</h2>
-        <canvas id="chart-situacao"></canvas>
-      </div>
-      <div class="chart-card">
-        <h2>Experiência em GRC</h2>
-        <canvas id="chart-grc"></canvas>
-      </div>
-      <div class="chart-card">
         <h2>Experiência COBIT 2019</h2>
         <canvas id="chart-cobit"></canvas>
       </div>
-      <div class="chart-card">
-        <h2>Tempo que conhece o Arteiro</h2>
-        <canvas id="chart-arteiro"></canvas>
-      </div>
-      <div class="chart-card">
-        <h2>Faixa de Renda Mensal</h2>
-        <canvas id="chart-renda"></canvas>
-      </div>
     </div>
 
-  </div>
+  </div><!-- /dashboard -->
 </main>
 
 <script>
-const PROXY_URL = '/api/sheets';
+const PROXY_URL  = '/api/sheets';
 const REFRESH_MS = 60_000;
 
 const PALETTE = [
-  '#6c63ff','#00d4aa','#f59e0b','#ef4444','#3b82f6',
-  '#10b981','#f97316','#8b5cf6','#ec4899','#14b8a6',
-  '#84cc16','#06b6d4','#a855f7','#fb923c','#22c55e',
+  '#e8b86d','#34d9b3','#4f8ef7','#a78bfa','#f97316',
+  '#f06b6b','#22d3ee','#84cc16','#ec4899','#facc15',
+  '#60a5fa','#fb923c','#a3e635','#c084fc',
 ];
 
+const BAR_GRADIENTS = [
+  ['#e8b86d','#f5d08a'],
+  ['#34d9b3','#6ee7d0'],
+  ['#4f8ef7','#7eb0ff'],
+  ['#a78bfa','#c4b5fd'],
+  ['#f97316','#fb923c'],
+  ['#f06b6b','#f87171'],
+  ['#22d3ee','#67e8f9'],
+  ['#84cc16','#a3e635'],
+];
+
+// ── CSV ─────────────────────────────────────────────────────────────────────
 function parseCSV(text) {
   const lines = text.trim().split('\n');
-  const headers = splitCSVLine(lines[0]);
+  const headers = splitLine(lines[0]);
   return lines.slice(1).map(line => {
-    const vals = splitCSVLine(line);
+    const vals = splitLine(line);
     const row = {};
     headers.forEach((h, i) => { row[h.trim()] = (vals[i] || '').trim(); });
     return row;
   });
 }
-
-function splitCSVLine(line) {
-  const result = [];
-  let cur = '', inQuote = false;
-  for (let i = 0; i < line.length; i++) {
-    const c = line[i];
-    if (c === '"') { inQuote = !inQuote; }
-    else if (c === ',' && !inQuote) { result.push(cur); cur = ''; }
+function splitLine(line) {
+  const r = []; let cur = '', q = false;
+  for (const c of line) {
+    if (c === '"') { q = !q; }
+    else if (c === ',' && !q) { r.push(cur); cur = ''; }
     else cur += c;
   }
-  result.push(cur);
-  return result;
+  r.push(cur); return r;
 }
 
+// ── DATE HELPERS ─────────────────────────────────────────────────────────────
+function rowToISO(raw) {
+  const br  = raw.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+  const iso = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (br)  return `${br[3]}-${br[2]}-${br[1]}`;
+  if (iso) return iso[0];
+  return null;
+}
+
+// ── COUNTING ─────────────────────────────────────────────────────────────────
 function countBy(rows, key) {
   const map = {};
   rows.forEach(r => {
@@ -186,71 +631,126 @@ function countBy(rows, key) {
   });
   return Object.entries(map).sort((a, b) => b[1] - a[1]);
 }
-
 function countByDate(rows) {
   const map = {};
   rows.forEach(r => {
-    const raw = r['Data'] || '';
-    const matchBR = raw.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
-    const matchISO = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
-    let key = null;
-    if (matchBR) key = `${matchBR[3]}-${matchBR[2]}-${matchBR[1]}`;
-    else if (matchISO) key = matchISO[0];
-    if (key) map[key] = (map[key] || 0) + 1;
+    const k = rowToISO(r['Data'] || '');
+    if (k) map[k] = (map[k] || 0) + 1;
   });
   return Object.entries(map).sort((a, b) => a[0].localeCompare(b[0]));
 }
 
-const charts = {};
+// ── FILTER STATE ─────────────────────────────────────────────────────────────
+let allRows = [];
 
-function upsertChart(id, type, labels, data) {
-  const ctx = document.getElementById(id).getContext('2d');
+function getFilteredRows() {
+  const from = document.getElementById('filter-from').value; // YYYY-MM-DD or ''
+  const to   = document.getElementById('filter-to').value;
+  if (!from && !to) return allRows;
+  return allRows.filter(r => {
+    const iso = rowToISO(r['Data'] || '');
+    if (!iso) return false;
+    if (from && iso < from) return false;
+    if (to   && iso > to)   return false;
+    return true;
+  });
+}
+
+// ── CHARTS ───────────────────────────────────────────────────────────────────
+const charts = {};
+const chartDefaults = {
+  responsive: true,
+  maintainAspectRatio: true,
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      bodyColor: '#dde3f0', titleColor: '#dde3f0',
+      backgroundColor: '#0e1220',
+      borderColor: '#1e2438', borderWidth: 1,
+      padding: 10,
+      titleFont: { family: 'Syne', weight: '700' },
+      bodyFont: { family: 'DM Sans' },
+    }
+  },
+  scales: {
+    x: { ticks: { color: '#6b7590', font: { size: 10, family: 'DM Sans' }, maxRotation: 40 }, grid: { color: '#1e2438' } },
+    y: { ticks: { color: '#6b7590', font: { family: 'DM Sans' } }, grid: { color: '#1e2438' }, beginAtZero: true }
+  }
+};
+
+function upsertChart(id, type, labels, data, extra = {}) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const ctx = el.getContext('2d');
   if (charts[id]) charts[id].destroy();
+  const isRound = type === 'doughnut' || type === 'pie';
   charts[id] = new Chart(ctx, {
     type,
     data: {
       labels,
       datasets: [{
         data,
-        backgroundColor: PALETTE.slice(0, labels.length),
-        borderColor: type === 'line' ? '#6c63ff' : PALETTE.slice(0, labels.length),
-        borderWidth: type === 'line' ? 2 : 0,
+        backgroundColor: isRound
+          ? PALETTE.slice(0, labels.length)
+          : PALETTE.slice(0, labels.length).map(c => c + '22'),
+        borderColor: isRound
+          ? PALETTE.slice(0, labels.length)
+          : PALETTE.slice(0, labels.length),
+        borderWidth: isRound ? 0 : 1.5,
+        borderRadius: type === 'bar' ? 5 : 0,
         fill: type === 'line',
-        tension: 0.4,
-        pointRadius: 3,
+        tension: 0.45,
+        pointRadius: type === 'line' ? 3 : 0,
+        pointBackgroundColor: '#e8b86d',
+        ...extra,
       }]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: true,
+      ...chartDefaults,
       plugins: {
-        legend: {
-          display: type !== 'bar' && type !== 'line',
-          labels: { color: '#8892a4', font: { size: 11 } }
-        },
-        tooltip: {
-          bodyColor: '#e2e8f0', titleColor: '#e2e8f0',
-          backgroundColor: '#1a1d27', borderColor: '#2a2d3e', borderWidth: 1
-        }
+        ...chartDefaults.plugins,
+        legend: { display: isRound, labels: { color: '#8c96b0', font: { size: 11, family: 'DM Sans' }, padding: 12, usePointStyle: true } }
       },
-      scales: (type === 'bar' || type === 'line') ? {
-        x: { ticks: { color: '#8892a4', font: { size: 10 }, maxRotation: 45 }, grid: { color: '#2a2d3e' } },
-        y: { ticks: { color: '#8892a4' }, grid: { color: '#2a2d3e' }, beginAtZero: true }
-      } : undefined
+      scales: isRound ? undefined : chartDefaults.scales,
     }
   });
 }
 
+// ── BREAKDOWN BARS ───────────────────────────────────────────────────────────
+function renderBarList(containerId, entries, colorPairs) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const max = entries[0]?.[1] || 1;
+  el.innerHTML = entries.slice(0, 8).map(([label, count], i) => {
+    const pct = Math.round((count / max) * 100);
+    const [c1, c2] = colorPairs[i % colorPairs.length];
+    return `
+      <div class="bar-item">
+        <div class="bar-meta">
+          <span class="bar-name" title="${label}">${label}</span>
+          <span class="bar-count">${count}</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:${pct}%;--bar-color:${c1};--bar-color2:${c2}"></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── RENDER ───────────────────────────────────────────────────────────────────
 function render(rows) {
-  document.getElementById('kpi-total').textContent = rows.length;
+  const n = rows.length;
+
+  // KPIs
+  document.getElementById('kpi-total').textContent = n;
 
   const todayISO = new Date().toISOString().slice(0, 10);
   const todayBR  = new Date().toLocaleDateString('pt-BR');
-  const inscHoje = rows.filter(r => {
+  const hoje = rows.filter(r => {
     const d = r['Data'] || '';
     return d.startsWith(todayBR) || d.startsWith(todayISO);
   }).length;
-  document.getElementById('kpi-hoje').textContent = inscHoje;
+  document.getElementById('kpi-hoje').textContent = hoje;
 
   const aoVivo = rows.filter(r =>
     /sim/i.test(r['Você poderá participar ao vivo no dia 09/Mai?'] || '')
@@ -260,55 +760,75 @@ function render(rows) {
   const estados = new Set(rows.map(r => r['Em qual estado você reside?']).filter(Boolean));
   document.getElementById('kpi-estados').textContent = estados.size;
 
-  document.getElementById('subtitle').textContent = `${rows.length} inscrições registradas`;
+  document.getElementById('kpi-pct-vivo').textContent =
+    n > 0 ? Math.round((aoVivo / n) * 100) + '%' : '0%';
 
-  const timeline = countByDate(rows);
+  // Timeline
+  const tl = countByDate(rows);
   upsertChart('chart-timeline', 'line',
-    timeline.map(([d]) => d),
-    timeline.map(([, v]) => v)
+    tl.map(([d]) => d), tl.map(([, v]) => v),
+    { backgroundColor: 'rgba(232,184,109,.07)', borderColor: '#e8b86d', borderWidth: 2 }
   );
 
-  const barCols = [
+  // Breakdown bars
+  renderBarList('bl-renda',    countBy(rows, 'Qual sua faixa de renda mensal atual...?'), BAR_GRADIENTS);
+  renderBarList('bl-carreira', countBy(rows, 'Em qual dessas situações você se encontra hoje?'), BAR_GRADIENTS.slice(2));
+  renderBarList('bl-grc',      countBy(rows, 'Você tem experiência prévia em Governança, Riscos, Auditoria, Segurança ou áreas relacionadas?'), BAR_GRADIENTS.slice(1));
+  renderBarList('bl-arteiro',  countBy(rows, 'Há quanto tempo você conhece Roberto Arteiro?'), BAR_GRADIENTS.slice(3));
+
+  // Charts
+  const bars = [
     ['chart-origem',      'Como você ficou sabendo do evento?'],
     ['chart-utm-source',  'utm_source'],
     ['chart-utm-content', 'utm_content'],
     ['chart-funcao',      'Qual a sua função ou atividade principal?'],
-    ['chart-situacao',    'Em qual dessas situações você se encontra hoje?'],
-    ['chart-grc',         'Você tem experiência prévia em Governança, Riscos, Auditoria, Segurança ou áreas relacionadas?'],
     ['chart-cobit',       'Qual sua experiência com COBIT 2019?'],
-    ['chart-arteiro',     'Há quanto tempo você conhece Roberto Arteiro?'],
-    ['chart-renda',       'Qual sua faixa de renda mensal atual...?'],
   ];
-  barCols.forEach(([id, col]) => {
-    const entries = countBy(rows, col).slice(0, 12);
-    upsertChart(id, 'bar', entries.map(([k]) => k), entries.map(([, v]) => v));
+  bars.forEach(([id, col]) => {
+    const e = countBy(rows, col).slice(0, 12);
+    upsertChart(id, 'bar', e.map(([k]) => k), e.map(([, v]) => v));
   });
 
-  const pieCols = [
+  const donuts = [
     ['chart-estado', 'Em qual estado você reside?'],
     ['chart-idade',  'Qual a sua faixa etária?'],
   ];
-  pieCols.forEach(([id, col]) => {
-    const entries = countBy(rows, col).slice(0, 12);
-    upsertChart(id, 'doughnut', entries.map(([k]) => k), entries.map(([, v]) => v));
+  donuts.forEach(([id, col]) => {
+    const e = countBy(rows, col).slice(0, 10);
+    upsertChart(id, 'doughnut', e.map(([k]) => k), e.map(([, v]) => v));
   });
 }
 
+// ── UPDATE UI ────────────────────────────────────────────────────────────────
+function updateDashboard() {
+  const rows = getFilteredRows();
+  const total = allRows.length;
+  const filtered = rows.length;
+  const filterCount = document.getElementById('filter-count');
+  filterCount.innerHTML = filtered < total
+    ? `Exibindo <span>${filtered}</span> de ${total} leads`
+    : `<span>${total}</span> leads no total`;
+  document.getElementById('subtitle').textContent =
+    `${filtered} inscrição${filtered !== 1 ? 'ões' : ''} registrada${filtered !== 1 ? 's' : ''}`;
+  render(rows);
+}
+
+// ── FETCH ────────────────────────────────────────────────────────────────────
 async function fetchData() {
   try {
     const res = await fetch(PROXY_URL);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const text = await res.text();
-    const rows = parseCSV(text).filter(r => r['Qual o seu nome?']);
+    allRows = parseCSV(text).filter(r => r['Qual o seu nome?']);
 
     document.getElementById('loading').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
     document.getElementById('error-msg').style.display = 'none';
 
-    render(rows);
+    updateDashboard();
 
     const now = new Date().toLocaleTimeString('pt-BR');
-    document.getElementById('last-update').textContent = `Atualizado às ${now}`;
+    document.getElementById('last-update').textContent = `Atualizado ${now}`;
   } catch (err) {
     const el = document.getElementById('error-msg');
     el.style.display = 'block';
@@ -317,9 +837,17 @@ async function fetchData() {
   }
 }
 
+// ── EVENTS ───────────────────────────────────────────────────────────────────
+document.getElementById('filter-from').addEventListener('change', updateDashboard);
+document.getElementById('filter-to').addEventListener('change', updateDashboard);
+document.getElementById('btn-reset').addEventListener('click', () => {
+  document.getElementById('filter-from').value = '';
+  document.getElementById('filter-to').value = '';
+  updateDashboard();
+});
+
 fetchData();
 setInterval(fetchData, REFRESH_MS);
 </script>
-
 </body>
 </html>
