@@ -771,7 +771,7 @@ function render(rows) {
   );
 
   // Breakdown bars
-  renderBarList('bl-renda',    countBy(rows, 'Qual sua faixa de renda mensal atual...?'), BAR_GRADIENTS);
+  renderBarList('bl-renda',    countBy(rows, 'Qual sua faixa de renda mensal atual ou, se estiver desempregado, a sua última faixa de renda?'), BAR_GRADIENTS);
   renderBarList('bl-carreira', countBy(rows, 'Em qual dessas situações você se encontra hoje?'), BAR_GRADIENTS.slice(2));
   renderBarList('bl-grc',      countBy(rows, 'Você tem experiência prévia em Governança, Riscos, Auditoria, Segurança ou áreas relacionadas?'), BAR_GRADIENTS.slice(1));
   renderBarList('bl-arteiro',  countBy(rows, 'Há quanto tempo você conhece Roberto Arteiro?'), BAR_GRADIENTS.slice(3));
