@@ -813,14 +813,31 @@ function render(rows) {
     n > 0 ? Math.round((aoVivo / n) * 100) + '%' : '0%';
 
   // FIT classification
-  const fits   = rows.map(classifyFIT);
+  const fits    = rows.map(classifyFIT);
   const nStart  = fits.filter(f => f === 'START').length;
   const nPro    = fits.filter(f => f === 'PRO').length;
   const nMaster = fits.filter(f => f === 'MASTER').length;
-  const pct = v => n > 0 ? Math.round((v / n) * 100) + '%' : '0%';
-  document.getElementById('kpi-fit-start').textContent  = pct(nStart);
-  document.getElementById('kpi-fit-pro').textContent    = pct(nPro);
-  document.getElementById('kpi-fit-master').textContent = pct(nMaster);
+
+  // Arredondamento que garante soma = 100%
+  if (n > 0) {
+    const raw    = [nStart, nPro, nMaster].map(v => (v / n) * 100);
+    const floored = raw.map(Math.floor);
+    const remainder = 100 - floored.reduce((a, b) => a + b, 0);
+    // distribui o resto para o índice com maior parte decimal
+    const diffs = raw.map((v, i) => v - floored[i]);
+    for (let i = 0; i < remainder; i++) {
+      const idx = diffs.indexOf(Math.max(...diffs));
+      floored[idx]++;
+      diffs[idx] = -1;
+    }
+    document.getElementById('kpi-fit-start').textContent  = floored[0] + '%';
+    document.getElementById('kpi-fit-pro').textContent    = floored[1] + '%';
+    document.getElementById('kpi-fit-master').textContent = floored[2] + '%';
+  } else {
+    ['kpi-fit-start','kpi-fit-pro','kpi-fit-master'].forEach(id => {
+      document.getElementById(id).textContent = '0%';
+    });
+  }
 
   // Timeline
   const tl = countByDate(rows);
