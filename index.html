@@ -145,9 +145,7 @@
 </main>
 
 <script>
-const SHEET_ID  = '1CNss4CpV-kHONP4kSKrCwHvuHZ58Eo34Hsz9VL6R1Sk';
-const CSV_URL   = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
-const PROXY_URL = `https://api.allorigins.win/raw?url=${encodeURIComponent(CSV_URL)}`;
+const PROXY_URL = '/api/sheets';
 const REFRESH_MS = 60_000;
 
 const PALETTE = [

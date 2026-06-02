@@ -1,6 +1,12 @@
 [build]
   publish = "."
 
+[[redirects]]
+  from = "/api/sheets"
+  to = "https://docs.google.com/spreadsheets/d/1CNss4CpV-kHONP4kSKrCwHvuHZ58Eo34Hsz9VL6R1Sk/export?format=csv"
+  status = 200
+  force = true
+
 [[headers]]
   for = "/*"
   [headers.values]
