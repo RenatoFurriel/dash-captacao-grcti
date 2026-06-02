@@ -794,10 +794,7 @@ function render(rows) {
   ).length;
   document.getElementById('kpi-ao-vivo').textContent = aoVivo;
 
-  const estados = new Set(rows.map(r => r['Em qual estado você reside?']).filter(Boolean));
-  document.getElementById('kpi-estados').textContent = estados.size;
-
-  document.getElementById('kpi-pct-vivo').textContent =
+document.getElementById('kpi-pct-vivo').textContent =
     n > 0 ? Math.round((aoVivo / n) * 100) + '%' : '0%';
 
   // FIT classification
