@@ -494,6 +494,21 @@
         <div class="value" id="kpi-pct-vivo">0%</div>
         <div class="label">Taxa Ao Vivo</div>
       </div>
+      <div class="kpi-card anim anim-6" style="--accent-color: #34d9b3">
+        <div class="kpi-icon">★</div>
+        <div class="value" id="kpi-fit-start">0%</div>
+        <div class="label">FIT START</div>
+      </div>
+      <div class="kpi-card anim anim-6" style="--accent-color: #e8b86d">
+        <div class="kpi-icon">★</div>
+        <div class="value" id="kpi-fit-pro">0%</div>
+        <div class="label">FIT PRO</div>
+      </div>
+      <div class="kpi-card anim anim-6" style="--accent-color: #a78bfa">
+        <div class="kpi-icon">★</div>
+        <div class="value" id="kpi-fit-master">0%</div>
+        <div class="label">FIT MASTER</div>
+      </div>
     </div>
 
     <!-- TIMELINE -->
@@ -551,10 +566,6 @@
         <canvas id="chart-utm-content"></canvas>
       </div>
       <div class="chart-card">
-        <h2>Estado</h2>
-        <canvas id="chart-estado"></canvas>
-      </div>
-      <div class="chart-card">
         <h2>Faixa Etária</h2>
         <canvas id="chart-idade"></canvas>
       </div>
@@ -565,6 +576,15 @@
       <div class="chart-card">
         <h2>Experiência COBIT 2019</h2>
         <canvas id="chart-cobit"></canvas>
+      </div>
+    </div>
+
+    <!-- DISTRIBUIÇÃO GEOGRÁFICA -->
+    <p class="section-title anim anim-1" style="margin-top:32px">Distribuição Geográfica</p>
+    <div class="charts-grid anim anim-2" style="margin-bottom:0">
+      <div class="chart-card full-width">
+        <h2>Leads por Estado</h2>
+        <canvas id="chart-estado" style="height:420px;max-height:none"></canvas>
       </div>
     </div>
 
@@ -638,6 +658,37 @@ function countByDate(rows) {
     if (k) map[k] = (map[k] || 0) + 1;
   });
   return Object.entries(map).sort((a, b) => a[0].localeCompare(b[0]));
+}
+
+// ── FIT CLASSIFICATION ───────────────────────────────────────────────────────
+function classifyFIT(r) {
+  const sit  = r['Em qual dessas situações você se encontra hoje?'] || '';
+  const exp  = r['Você tem experiência prévia em Governança, Riscos, Auditoria, Segurança ou áreas relacionadas?'] || '';
+  const rend = r['Qual sua faixa de renda mensal atual ou, se estiver desempregado, a sua última faixa de renda?'] || '';
+  const func = r['Qual a sua função ou atividade principal?'] || '';
+
+  const MASTER_FUNCOES = ['Consultor','Sócio consultoria','Director','Diretora de Compliance',
+    'Diretor de Riscos','Gestor de Governança Riscos e Compliance','Gerente Governança de TI','Diretor de TI'];
+  const MASTER_RENDAS  = ['20K a 25K','Acima de 25K'];
+
+  const PRO_SITS  = ['Já tenho uma boa experiência em GRC TI ou Cyber',
+    'Sou de TI ou área correlata, mas quero algo mais estratégico',
+    'Empregado liderando áreas','Já atuo em GRC TI, mas estou no início','Aprimoramento'];
+  const PRO_EXPS  = ['Sim, tenho experiência','Tenho experiência indireta (projetos, suporte etc.)'];
+  const PRO_RENDAS = ['10K a 15K','15K a 20K','20K a 25K','Acima de 25K'];
+
+  const START_SITS = ['Estou em transição de carreira','Quero entrar no mercado de GRC TI',
+    'Estou desempregado(a) e quero recolocação','Não trabalho com TI',
+    'Trabalhando com desenvolvimento','Desempregado. Iniciando uma Startup SaaS'];
+
+  if (sit === 'Já tenho uma boa experiência em GRC TI ou Cyber' &&
+      (MASTER_RENDAS.includes(rend) || MASTER_FUNCOES.includes(func))) return 'MASTER';
+
+  if (PRO_EXPS.includes(exp) && PRO_SITS.includes(sit) && PRO_RENDAS.includes(rend)) return 'PRO';
+
+  if (START_SITS.includes(sit) || exp === 'Não, estou começando do zero') return 'START';
+
+  return null;
 }
 
 // ── FILTER STATE ─────────────────────────────────────────────────────────────
@@ -763,6 +814,16 @@ function render(rows) {
   document.getElementById('kpi-pct-vivo').textContent =
     n > 0 ? Math.round((aoVivo / n) * 100) + '%' : '0%';
 
+  // FIT classification
+  const fits   = rows.map(classifyFIT);
+  const nStart  = fits.filter(f => f === 'START').length;
+  const nPro    = fits.filter(f => f === 'PRO').length;
+  const nMaster = fits.filter(f => f === 'MASTER').length;
+  const pct = v => n > 0 ? Math.round((v / n) * 100) + '%' : '0%';
+  document.getElementById('kpi-fit-start').textContent  = pct(nStart);
+  document.getElementById('kpi-fit-pro').textContent    = pct(nPro);
+  document.getElementById('kpi-fit-master').textContent = pct(nMaster);
+
   // Timeline
   const tl = countByDate(rows);
   upsertChart('chart-timeline', 'line',
@@ -790,13 +851,49 @@ function render(rows) {
   });
 
   const donuts = [
-    ['chart-estado', 'Em qual estado você reside?'],
-    ['chart-idade',  'Qual a sua faixa etária?'],
+    ['chart-idade', 'Qual a sua faixa etária?'],
   ];
   donuts.forEach(([id, col]) => {
     const e = countBy(rows, col).slice(0, 10);
     upsertChart(id, 'doughnut', e.map(([k]) => k), e.map(([, v]) => v));
   });
+
+  // Estado — bar horizontal no rodapé
+  const eEstado = countBy(rows, 'Em qual estado você reside?').slice(0, 25);
+  const ctxEstado = document.getElementById('chart-estado');
+  if (ctxEstado) {
+    if (charts['chart-estado']) charts['chart-estado'].destroy();
+    charts['chart-estado'] = new Chart(ctxEstado.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: eEstado.map(([k]) => k),
+        datasets: [{
+          data: eEstado.map(([, v]) => v),
+          backgroundColor: PALETTE.slice(0, eEstado.length).map(c => c + '33'),
+          borderColor: PALETTE.slice(0, eEstado.length),
+          borderWidth: 1.5,
+          borderRadius: 5,
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            bodyColor: '#dde3f0', titleColor: '#dde3f0',
+            backgroundColor: '#0e1220', borderColor: '#1e2438', borderWidth: 1,
+            padding: 10,
+          }
+        },
+        scales: {
+          x: { ticks: { color: '#6b7590', font: { size: 10 } }, grid: { color: '#1e2438' }, beginAtZero: true },
+          y: { ticks: { color: '#dde3f0', font: { size: 11 } }, grid: { color: '#1e2438' } }
+        }
+      }
+    });
+  }
 }
 
 // ── UPDATE UI ────────────────────────────────────────────────────────────────
