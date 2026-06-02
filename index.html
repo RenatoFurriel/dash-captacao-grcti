@@ -667,28 +667,26 @@ function classifyFIT(r) {
   const rend = r['Qual sua faixa de renda mensal atual ou, se estiver desempregado, a sua última faixa de renda?'] || '';
   const func = r['Qual a sua função ou atividade principal?'] || '';
 
+  // MASTER: experiência consolidada + seniority (cargo ou renda alta)
   const MASTER_FUNCOES = ['Consultor','Sócio consultoria','Director','Diretora de Compliance',
     'Diretor de Riscos','Gestor de Governança Riscos e Compliance','Gerente Governança de TI','Diretor de TI'];
   const MASTER_RENDAS  = ['20K a 25K','Acima de 25K'];
 
-  const PRO_SITS  = ['Já tenho uma boa experiência em GRC TI ou Cyber',
-    'Sou de TI ou área correlata, mas quero algo mais estratégico',
-    'Empregado liderando áreas','Já atuo em GRC TI, mas estou no início','Aprimoramento'];
-  const PRO_EXPS  = ['Sim, tenho experiência','Tenho experiência indireta (projetos, suporte etc.)'];
-  const PRO_RENDAS = ['10K a 15K','15K a 20K','20K a 25K','Acima de 25K'];
-
-  const START_SITS = ['Estou em transição de carreira','Quero entrar no mercado de GRC TI',
-    'Estou desempregado(a) e quero recolocação','Não trabalho com TI',
-    'Trabalhando com desenvolvimento','Desempregado. Iniciando uma Startup SaaS'];
-
   if (sit === 'Já tenho uma boa experiência em GRC TI ou Cyber' &&
       (MASTER_RENDAS.includes(rend) || MASTER_FUNCOES.includes(func))) return 'MASTER';
 
-  if (PRO_EXPS.includes(exp) && PRO_SITS.includes(sit) && PRO_RENDAS.includes(rend)) return 'PRO';
+  // PRO: já atua ou quer algo estratégico + tem experiência em GRC
+  // (renda não é critério de produto — é critério de capacidade de compra)
+  const PRO_SITS = ['Já tenho uma boa experiência em GRC TI ou Cyber',
+    'Sou de TI ou área correlata, mas quero algo mais estratégico',
+    'Empregado liderando áreas','Já atuo em GRC TI, mas estou no início','Aprimoramento'];
+  const PRO_EXPS = ['Sim, tenho experiência','Tenho experiência indireta (projetos, suporte etc.)'];
 
-  if (START_SITS.includes(sit) || exp === 'Não, estou começando do zero') return 'START';
+  if (PRO_EXPS.includes(exp) && PRO_SITS.includes(sit)) return 'PRO';
 
-  return null;
+  // START: catch-all — entrada no mercado, transição, desempregado, sem experiência em GRC,
+  // ou qualquer situação não classificada acima
+  return 'START';
 }
 
 // ── FILTER STATE ─────────────────────────────────────────────────────────────
