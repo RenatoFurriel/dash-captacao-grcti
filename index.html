@@ -553,9 +553,9 @@
     <!-- CHARTS -->
     <p class="section-title anim anim-1">Canais &amp; Distribuição</p>
     <div class="charts-grid anim anim-2">
-      <div class="chart-card">
-        <h2>Como ficou sabendo</h2>
-        <canvas id="chart-origem"></canvas>
+      <div class="breakdown-card">
+        <h2><span class="icon">📣</span> Como ficou sabendo</h2>
+        <div class="bar-list" id="bl-origem"></div>
       </div>
       <div class="chart-card">
         <h2>UTM Source</h2>
@@ -569,13 +569,13 @@
         <h2>Faixa Etária</h2>
         <canvas id="chart-idade"></canvas>
       </div>
-      <div class="chart-card">
-        <h2>Função</h2>
-        <canvas id="chart-funcao"></canvas>
+      <div class="breakdown-card">
+        <h2><span class="icon">💼</span> Função</h2>
+        <div class="bar-list" id="bl-funcao"></div>
       </div>
-      <div class="chart-card">
-        <h2>Experiência COBIT 2019</h2>
-        <canvas id="chart-cobit"></canvas>
+      <div class="breakdown-card">
+        <h2><span class="icon">📘</span> Experiência COBIT 2019</h2>
+        <div class="bar-list" id="bl-cobit"></div>
       </div>
     </div>
 
@@ -843,13 +843,15 @@ function render(rows) {
   renderBarList('bl-grc',      countBy(rows, 'Você tem experiência prévia em Governança, Riscos, Auditoria, Segurança ou áreas relacionadas?'), BAR_GRADIENTS.slice(1));
   renderBarList('bl-arteiro',  countBy(rows, 'Há quanto tempo você conhece Roberto Arteiro?'), BAR_GRADIENTS.slice(3));
 
+  // Breakdown bars — canais & distribuição
+  renderBarList('bl-origem', countBy(rows, 'Como você ficou sabendo do evento?'), BAR_GRADIENTS);
+  renderBarList('bl-funcao', countBy(rows, 'Qual a sua função ou atividade principal?'), BAR_GRADIENTS.slice(2));
+  renderBarList('bl-cobit',  countBy(rows, 'Qual sua experiência com COBIT 2019?'), BAR_GRADIENTS.slice(4));
+
   // Charts — barras verticais
   const bars = [
-    ['chart-origem',      'Como você ficou sabendo do evento?'],
     ['chart-utm-source',  'utm_source'],
     ['chart-utm-content', 'utm_content'],
-    ['chart-funcao',      'Qual a sua função ou atividade principal?'],
-    ['chart-cobit',       'Qual sua experiência com COBIT 2019?'],
   ];
   bars.forEach(([id, col]) => {
     const e = countBy(rows, col).slice(0, 12);
