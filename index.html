@@ -553,9 +553,9 @@
     <!-- CHARTS -->
     <p class="section-title anim anim-1">Canais &amp; Distribuição</p>
     <div class="charts-grid anim anim-2">
-      <div class="chart-card">
+      <div class="chart-card full-width">
         <h2>Como ficou sabendo</h2>
-        <canvas id="chart-origem"></canvas>
+        <canvas id="chart-origem" style="height:280px;max-height:none"></canvas>
       </div>
       <div class="chart-card">
         <h2>UTM Source</h2>
@@ -569,13 +569,13 @@
         <h2>Faixa Etária</h2>
         <canvas id="chart-idade"></canvas>
       </div>
-      <div class="chart-card">
+      <div class="chart-card full-width">
         <h2>Função</h2>
-        <canvas id="chart-funcao"></canvas>
+        <canvas id="chart-funcao" style="height:360px;max-height:none"></canvas>
       </div>
-      <div class="chart-card">
+      <div class="chart-card full-width">
         <h2>Experiência COBIT 2019</h2>
-        <canvas id="chart-cobit"></canvas>
+        <canvas id="chart-cobit" style="height:260px;max-height:none"></canvas>
       </div>
     </div>
 
@@ -843,17 +843,70 @@ function render(rows) {
   renderBarList('bl-grc',      countBy(rows, 'Você tem experiência prévia em Governança, Riscos, Auditoria, Segurança ou áreas relacionadas?'), BAR_GRADIENTS.slice(1));
   renderBarList('bl-arteiro',  countBy(rows, 'Há quanto tempo você conhece Roberto Arteiro?'), BAR_GRADIENTS.slice(3));
 
-  // Charts
+  // Charts — verticais
   const bars = [
-    ['chart-origem',      'Como você ficou sabendo do evento?'],
     ['chart-utm-source',  'utm_source'],
     ['chart-utm-content', 'utm_content'],
-    ['chart-funcao',      'Qual a sua função ou atividade principal?'],
-    ['chart-cobit',       'Qual sua experiência com COBIT 2019?'],
   ];
   bars.forEach(([id, col]) => {
     const e = countBy(rows, col).slice(0, 12);
     upsertChart(id, 'bar', e.map(([k]) => k), e.map(([, v]) => v));
+  });
+
+  // Charts — horizontais (labels longos)
+  const hbars = [
+    ['chart-origem', 'Como você ficou sabendo do evento?',  12],
+    ['chart-funcao', 'Qual a sua função ou atividade principal?', 20],
+    ['chart-cobit',  'Qual sua experiência com COBIT 2019?', 10],
+  ];
+  hbars.forEach(([id, col, limit]) => {
+    const e = countBy(rows, col).slice(0, limit);
+    const ctx = document.getElementById(id);
+    if (!ctx) return;
+    if (charts[id]) charts[id].destroy();
+    charts[id] = new Chart(ctx.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: e.map(([k]) => k),
+        datasets: [{
+          data: e.map(([, v]) => v),
+          backgroundColor: PALETTE.slice(0, e.length).map(c => c + '33'),
+          borderColor: PALETTE.slice(0, e.length),
+          borderWidth: 1.5,
+          borderRadius: 5,
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            bodyColor: '#dde3f0', titleColor: '#dde3f0',
+            backgroundColor: '#0e1220', borderColor: '#1e2438', borderWidth: 1,
+            padding: 10,
+            titleFont: { family: 'Syne', weight: '700' },
+            bodyFont: { family: 'DM Sans' },
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#6b7590', font: { size: 11, family: 'DM Sans' } },
+            grid: { color: '#1e2438' },
+            beginAtZero: true,
+          },
+          y: {
+            ticks: {
+              color: '#dde3f0',
+              font: { size: 12, family: 'DM Sans' },
+              crossAlign: 'far',
+            },
+            grid: { color: '#1e2438' },
+          }
+        }
+      }
+    });
   });
 
   const donuts = [
