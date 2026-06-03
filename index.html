@@ -580,7 +580,8 @@
 </main>
 
 <script>
-const PROXY_URL  = '/api/sheets';
+const SHEET_CSV  = 'https://docs.google.com/spreadsheets/d/1CNss4CpV-kHONP4kSKrCwHvuHZ58Eo34Hsz9VL6R1Sk/export?format=csv';
+const PROXY_URL  = 'https://corsproxy.io/?' + encodeURIComponent(SHEET_CSV);
 const REFRESH_MS = 60_000;
 
 const PALETTE = [
