@@ -781,8 +781,12 @@ function render(rows) {
   // KPIs
   document.getElementById('kpi-total').textContent = n;
 
-  const todayISO = new Date().toISOString().slice(0, 10);
-  const todayBR  = new Date().toLocaleDateString('pt-BR');
+  const _now = new Date();
+  const _dd  = String(_now.getDate()).padStart(2, '0');
+  const _mm  = String(_now.getMonth() + 1).padStart(2, '0');
+  const _yyyy = _now.getFullYear();
+  const todayBR  = `${_dd}/${_mm}/${_yyyy}`;
+  const todayISO = `${_yyyy}-${_mm}-${_dd}`;
   const hoje = rows.filter(r => {
     const d = r['Data'] || '';
     return d.startsWith(todayBR) || d.startsWith(todayISO);
