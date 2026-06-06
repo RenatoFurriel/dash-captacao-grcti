@@ -486,6 +486,16 @@
         <div class="value" id="kpi-ao-vivo">0</div>
         <div class="label">Participarão Ao Vivo</div>
       </div>
+      <div class="kpi-card anim anim-4" style="--accent-color: #22d3ee">
+        <div class="kpi-icon">✓</div>
+        <div class="value" id="kpi-checkin">—</div>
+        <div class="label">Check-in Realizado</div>
+      </div>
+      <div class="kpi-card anim anim-4" style="--accent-color: #4f8ef7">
+        <div class="kpi-icon">▶</div>
+        <div class="value" id="kpi-zoom">—</div>
+        <div class="label">Entrou no Zoom</div>
+      </div>
 <div class="kpi-card anim anim-5" style="--accent-color: #f97316">
         <div class="kpi-icon">◆</div>
         <div class="value" id="kpi-pct-vivo">0%</div>
@@ -952,6 +962,29 @@ document.getElementById('btn-reset').addEventListener('click', () => {
 
 fetchData();
 setInterval(fetchData, REFRESH_MS);
+
+// ── DATA CRAZY (funil MKT IMA CLAUDE) ─────────────────────────────────────────
+// Busca contagens ao vivo de Check-in e Zoom via Netlify Function (token fica
+// seguro no servidor). Em ambiente sem a função (ex.: abrir o arquivo local),
+// os cards ficam com "—".
+const IMA_STATS_URL = '/api/ima-stats';
+
+async function fetchIMAStats() {
+  try {
+    const res = await fetch(IMA_STATS_URL);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const { checkin, zoom } = await res.json();
+    if (typeof checkin === 'number')
+      document.getElementById('kpi-checkin').textContent = checkin.toLocaleString('pt-BR');
+    if (typeof zoom === 'number')
+      document.getElementById('kpi-zoom').textContent = zoom.toLocaleString('pt-BR');
+  } catch (err) {
+    console.warn('IMA stats indisponível:', err.message);
+  }
+}
+
+fetchIMAStats();
+setInterval(fetchIMAStats, REFRESH_MS);
 </script>
 </body>
 </html>
