@@ -964,27 +964,25 @@ fetchData();
 setInterval(fetchData, REFRESH_MS);
 
 // ── DATA CRAZY (funil MKT IMA CLAUDE) ─────────────────────────────────────────
-// Busca contagens ao vivo de Check-in e Zoom via Netlify Function (token fica
-// seguro no servidor). Em ambiente sem a função (ex.: abrir o arquivo local),
-// os cards ficam com "—".
-const IMA_STATS_URL = '/api/ima-stats';
-
-async function fetchIMAStats() {
+// Lê snapshot estático crm.json (gerado via Data Crazy MCP). Contagem ACUMULADA:
+//   Check-in realizado = quem passou pela etapa CHECKIN REALIZADO ou além
+//   Entrou no Zoom     = quem passou pela etapa ENTROU NO ZOOM ou além
+async function fetchCRM() {
   try {
-    const res = await fetch(IMA_STATS_URL);
+    const res = await fetch('crm.json?_=' + Date.now());
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const { checkin, zoom } = await res.json();
-    if (typeof checkin === 'number')
-      document.getElementById('kpi-checkin').textContent = checkin.toLocaleString('pt-BR');
-    if (typeof zoom === 'number')
-      document.getElementById('kpi-zoom').textContent = zoom.toLocaleString('pt-BR');
+    const json = await res.json();
+    if (typeof json.checkin === 'number')
+      document.getElementById('kpi-checkin').textContent = json.checkin.toLocaleString('pt-BR');
+    if (typeof json.zoom === 'number')
+      document.getElementById('kpi-zoom').textContent = json.zoom.toLocaleString('pt-BR');
   } catch (err) {
-    console.warn('IMA stats indisponível:', err.message);
+    console.warn('CRM (crm.json) indisponível:', err.message);
   }
 }
 
-fetchIMAStats();
-setInterval(fetchIMAStats, REFRESH_MS);
+fetchCRM();
+setInterval(fetchCRM, REFRESH_MS);
 </script>
 </body>
 </html>

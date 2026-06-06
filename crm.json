@@ -1,0 +1,19 @@
+{
+  "generatedAt": "2026-06-06T17:49:25Z",
+  "pipeline": "MKT IMA CLAUDE",
+  "checkin": 664,
+  "zoom": 535,
+  "stages": {
+    "INSCRITO": 1,
+    "QUALIFICADO": 0,
+    "NOTIFICADO_E_AMANHA": 0,
+    "CHECKIN_REALIZADO": 1,
+    "NOTIFICADO_E_HOJE": 0,
+    "NOTIFICADO_COMECOU_AGORA": 128,
+    "ENTROU_NO_ZOOM": 129,
+    "CONCLUIU_A_IMERSAO": 0,
+    "PARTICIPOU_PARCIALMENTE": 406,
+    "NAO_PARTICIPOU": 65,
+    "NAO_TEM_INTERESSE": 4
+  }
+}
